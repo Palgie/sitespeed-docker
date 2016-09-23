@@ -1,0 +1,5 @@
+http://mig.me/home
+http://www.migshop.me/id
+http://mig.me/music
+http://mig.me/games
+http://mig.me/search/posts/?query=test
