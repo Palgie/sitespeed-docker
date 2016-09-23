@@ -1,0 +1,52 @@
+version: '2'
+services:
+  graphite:
+    image: sitespeedio/graphite
+    ports:
+      - "8080:80"
+      - "2003:2003"
+    restart: always
+    volumes:
+      - /data/graphite/storage/whisper:/opt/graphite/storage/whisper
+      - /Users/phillipgourley/Sites/.htpasswd:/etc/nginx/.htpasswd
+      - /Users/phillipgourley/Sites/carbon.conf:/var/lib/graphite/conf/carbon.conf
+    expose:
+      - "8080"
+      - "2003"
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=<USER>
+      - GF_SECURITY_ADMIN_PASSWORD=<PASSWORD>
+    restart: always
+    volumes:
+      - .data/grafana:/var/lib/grafana
+  selenium-hub:
+    image: selenium/hub:2.53.0
+    ports:
+      - "4444:4444"
+    volumes:
+      - .data/shm:/dev/shm
+    expose:
+      - "4444"
+    environment:
+      - JAVA_OPTS=-Xmx512m
+      - HUB_PORT_4444_TCP_PORT=4444
+  selenium-chrome:
+    image: selenium/node-chrome
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium-hub
+    # Fix for bug reported here: https://github.com/SeleniumHQ/docker-selenium/issues/91
+    command: bash -c "rm /tmp/.X99-lock || echo 'Lock not found, continuing normal startup' && export no_proxy=*.local && /opt/bin/entry_point.sh"
+  selenium-firefox:
+    image: selenium/node-firefox
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium-hub
+    # Fix for bug reported here: https://github.com/SeleniumHQ/docker-selenium/issues/91
+    command: bash -c "rm /tmp/.X99-lock || echo 'Lock not found, continuing normal startup' && export no_proxy=*.local && /opt/bin/entry_point.sh"
+
+# volumes:
+#   /data/grafana:
+#     local: true
